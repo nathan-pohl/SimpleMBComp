@@ -16,6 +16,7 @@ const juce::String THRESHOLD_NAME = "Threshold";
 const juce::String ATTACK_NAME = "Attack";
 const juce::String RELEASE_NAME = "Release";
 const juce::String RATIO_NAME = "Ratio";
+const juce::String BYPASS_NAME = "Bypassed";
 
 //==============================================================================
 // Ranges
@@ -33,3 +34,5 @@ const float DEFAULT_SKEW_FACTOR = 1.f;
 
 const auto RATIO_CHOICES = std::vector<double>{ 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 50, 100 };
 const float RATIO_DEFAULT = 3.f;
+
+const bool BYPASSED_DEFAULT = false;
