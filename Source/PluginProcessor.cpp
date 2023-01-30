@@ -166,7 +166,8 @@ bool SimpleMBCompAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleMBCompAudioProcessor::createEditor()
 {
-    return new SimpleMBCompAudioProcessorEditor (*this);
+    // return new SimpleMBCompAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -183,6 +184,26 @@ void SimpleMBCompAudioProcessor::setStateInformation (const void* data, int size
     // whose contents will have been created by the getStateInformation() call.
 }
 
+
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::createParameterLayout() {
+    APVTS::ParameterLayout layout;
+    using namespace juce;
+
+    auto thresholdRange = NormalisableRange<float>(THRESHOLD_MIN_VAL, THRESHOLD_MAX_VAL, DEFAULT_INTERVAL, DEFAULT_SKEW_FACTOR);
+    layout.add(std::make_unique<AudioParameterFloat>(THRESHOLD_NAME, THRESHOLD_NAME, thresholdRange, THRESHOLD_DEFAULT));
+
+    auto attackReleaseRange = NormalisableRange<float>(ATTACK_RELEASE_MIN_VAL, ATTACK_RELEASE_MAX_VAL, DEFAULT_INTERVAL, DEFAULT_SKEW_FACTOR);
+    layout.add(std::make_unique<AudioParameterFloat>(ATTACK_NAME, ATTACK_NAME, attackReleaseRange, ATTACK_DEFAULT));
+    layout.add(std::make_unique<AudioParameterFloat>(RELEASE_NAME, RELEASE_NAME, attackReleaseRange, RELEASE_DEFAULT));
+
+    juce::StringArray sa;
+    for (auto choice : RATIO_CHOICES) {
+        sa.add(juce::String(choice, 1));
+    }
+    layout.add(std::make_unique<AudioParameterChoice>(RATIO_NAME, RATIO_NAME, sa, RATIO_DEFAULT));
+
+    return layout;
+}
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
