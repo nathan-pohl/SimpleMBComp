@@ -22,16 +22,16 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
                        )
 #endif
 {
-    attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(ATTACK_NAME));
-    jassert(attack != nullptr);
-    release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(RELEASE_NAME));
-    jassert(release != nullptr);
-    threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(THRESHOLD_NAME));
-    jassert(threshold != nullptr);
-    ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(RATIO_NAME));
-    jassert(ratio != nullptr);
-    bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(BYPASS_NAME));
-    jassert(bypassed != nullptr);
+    compressor.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(ATTACK_NAME));
+    jassert(compressor.attack != nullptr);
+    compressor.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(RELEASE_NAME));
+    jassert(compressor.release != nullptr);
+    compressor.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(THRESHOLD_NAME));
+    jassert(compressor.threshold != nullptr);
+    compressor.ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(RATIO_NAME));
+    jassert(compressor.ratio != nullptr);
+    compressor.bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(BYPASS_NAME));
+    jassert(compressor.bypassed != nullptr);
 }
 
 SimpleMBCompAudioProcessor::~SimpleMBCompAudioProcessor()
@@ -158,17 +158,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    compressor.setAttack(attack->get());
-    compressor.setRelease(release->get());
-    compressor.setThreshold(threshold->get());
-    compressor.setRatio(ratio->getCurrentChoiceName().getFloatValue());
-
-    auto block = juce::dsp::AudioBlock<float>(buffer);
-    auto context = juce::dsp::ProcessContextReplacing<float>(block);
-
-    context.isBypassed = bypassed->get();
-
-    compressor.process(context);
+    compressor.updateCompressorSettings();
+    compressor.process(buffer);
 }
 
 //==============================================================================
