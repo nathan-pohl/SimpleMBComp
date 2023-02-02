@@ -22,16 +22,29 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
                        )
 #endif
 {
-    compressor.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(ATTACK_NAME));
-    jassert(compressor.attack != nullptr);
-    compressor.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(RELEASE_NAME));
-    jassert(compressor.release != nullptr);
-    compressor.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(THRESHOLD_NAME));
-    jassert(compressor.threshold != nullptr);
-    compressor.ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(RATIO_NAME));
-    jassert(compressor.ratio != nullptr);
-    compressor.bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(BYPASS_NAME));
-    jassert(compressor.bypassed != nullptr);
+    using namespace Params;
+    const auto& params = GetParams();
+
+    auto floatHelper = [&apvts = this->apvts, &params](auto& param, const auto& paramName) {
+        param = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(params.at(paramName)));
+        jassert(param != nullptr);
+    };
+
+    auto choiceHelper = [&apvts = this->apvts, &params](auto& param, const auto& paramName) {
+        param = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(params.at(paramName)));
+        jassert(param != nullptr);
+    };
+
+    auto boolHelper = [&apvts = this->apvts, &params](auto& param, const auto& paramName) {
+        param = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(params.at(paramName)));
+        jassert(param != nullptr);
+    };
+
+    floatHelper(compressor.attack, Names::AttackLowBand);
+    floatHelper(compressor.release, Names::ReleaseLowBand);
+    floatHelper(compressor.threshold, Names::ThresholdLowBand);
+    choiceHelper(compressor.ratio, Names::RatioLowBand);
+    boolHelper(compressor.bypassed, Names::BypassedLowBand);
 }
 
 SimpleMBCompAudioProcessor::~SimpleMBCompAudioProcessor()
@@ -193,21 +206,23 @@ void SimpleMBCompAudioProcessor::setStateInformation (const void* data, int size
 juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::createParameterLayout() {
     APVTS::ParameterLayout layout;
     using namespace juce;
+    using namespace Params;
+    const auto& params = GetParams();
 
     auto thresholdRange = NormalisableRange<float>(THRESHOLD_MIN_VAL, THRESHOLD_MAX_VAL, DEFAULT_INTERVAL, DEFAULT_SKEW_FACTOR);
-    layout.add(std::make_unique<AudioParameterFloat>(THRESHOLD_NAME, THRESHOLD_NAME, thresholdRange, THRESHOLD_DEFAULT));
+    layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::ThresholdLowBand), params.at(Names::ThresholdLowBand), thresholdRange, THRESHOLD_DEFAULT));
 
     auto attackReleaseRange = NormalisableRange<float>(ATTACK_RELEASE_MIN_VAL, ATTACK_RELEASE_MAX_VAL, DEFAULT_INTERVAL, DEFAULT_SKEW_FACTOR);
-    layout.add(std::make_unique<AudioParameterFloat>(ATTACK_NAME, ATTACK_NAME, attackReleaseRange, ATTACK_DEFAULT));
-    layout.add(std::make_unique<AudioParameterFloat>(RELEASE_NAME, RELEASE_NAME, attackReleaseRange, RELEASE_DEFAULT));
+    layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::AttackLowBand), params.at(Names::AttackLowBand), attackReleaseRange, ATTACK_DEFAULT));
+    layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::ReleaseLowBand), params.at(Names::ReleaseLowBand), attackReleaseRange, RELEASE_DEFAULT));
 
     juce::StringArray sa;
     for (auto choice : RATIO_CHOICES) {
         sa.add(juce::String(choice, 1));
     }
-    layout.add(std::make_unique<AudioParameterChoice>(RATIO_NAME, RATIO_NAME, sa, RATIO_DEFAULT));
+    layout.add(std::make_unique<AudioParameterChoice>(params.at(Names::RatioLowBand), params.at(Names::RatioLowBand), sa, RATIO_DEFAULT));
 
-    layout.add(std::make_unique<AudioParameterBool>(BYPASS_NAME, BYPASS_NAME, BYPASSED_DEFAULT));
+    layout.add(std::make_unique<AudioParameterBool>(params.at(Names::BypassedLowBand), params.at(Names::BypassedLowBand), BYPASSED_DEFAULT));
 
     return layout;
 }
