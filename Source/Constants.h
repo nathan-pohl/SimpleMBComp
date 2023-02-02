@@ -36,3 +36,7 @@ const auto RATIO_CHOICES = std::vector<double>{ 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10,
 const float RATIO_DEFAULT = 3.f;
 
 const bool BYPASSED_DEFAULT = false;
+
+const float MINIMUM_FREQUENCY = 20.f;
+const float MAXIMUM_FREQUENCY = 20000.f; // 20 kHz
+const float LOW_MID_CROSSOVER_DEFAULT_FREQUENCY = 500.f;
