@@ -46,7 +46,7 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     choiceHelper(compressor.ratio, Names::RatioLowBand);
     boolHelper(compressor.bypassed, Names::BypassedLowBand);
 
-    floatHelper(lowCrossover, Names::LowMidCrossoverFreq);
+    floatHelper(lowMidCrossover, Names::LowMidCrossoverFreq);
 
     LP.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
     HP.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
@@ -186,10 +186,14 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //compressor.updateCompressorSettings();
     //compressor.process(buffer);
 
+    // this wasn't explained in the video at all, but this for loop is actually populating the filterBuffers with
+    // copies of the buffer using the reference to each buffer in the array with 'auto& fb'
+    // this allows all the code below to let the LinkwitzRileyFilter work on the buffer
+    // while leaving the signal intact when the filter outputs are summed.
     for (auto& fb : filterBuffers) {
         fb = buffer;
     }
-    auto cutoff = lowCrossover->get();
+    auto cutoff = lowMidCrossover->get();
     LP.setCutoffFrequency(cutoff);
     HP.setCutoffFrequency(cutoff);
     
@@ -209,7 +213,7 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     buffer.clear();
     auto addFilterBand = [nc = numChannels, ns = numSamples](auto& inputBuffer, const auto& source) {
         for (auto i = 0; i < nc; ++i) {
-            inputBuffer.addFrom(i, 0, source, i, 0, ns)
+            inputBuffer.addFrom(i, 0, source, i, 0, ns);
         }
     };
 
