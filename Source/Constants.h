@@ -37,6 +37,9 @@ const float RATIO_DEFAULT = 3.f;
 
 const bool BYPASSED_DEFAULT = false;
 
-const float MINIMUM_FREQUENCY = 20.f;
-const float MAXIMUM_FREQUENCY = 20000.f; // 20 kHz
-const float LOW_MID_CROSSOVER_DEFAULT_FREQUENCY = 500.f;
+const float LOW_MID_MIN_FREQ = 20.f;
+const float LOW_MID_MAX_FREQ = 999.f;
+const float MID_HIGH_MIN_FREQ = 1000.f;
+const float MID_HIGH_MAX_FREQ = 20000.f; // 20 kHz
+const float LOW_MID_CROSSOVER_DEFAULT_FREQUENCY = 400.f;
+const float MID_HIGH_CROSSOVER_DEFAULT_FREQUENCY = 2000.f;
