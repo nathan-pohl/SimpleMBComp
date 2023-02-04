@@ -8,18 +8,6 @@
 
 #pragma once
 
-/*
-    DSP Roadmap
-    DONE 1) figure out how to split the audio into 3 bands
-    DONE 2) create parameters to control where this split happens
-    DONE 3) prove that splitting into 3 bands produces no audible artifacts
-    4) create audio parameeters for the 3 compressor bands. These need to live on each band instance.
-    5) add 2 remaining compressors
-    6) add ability to mute/solo/bypass individual compressors
-    7) add input and output gain to offset changes in output level
-    8) clean up anything that needs cleaning up
-*/
-
 #include <JuceHeader.h>
 #include "Constants.h"
 
@@ -47,6 +35,14 @@ namespace Params {
         BypassedLowBand,
         BypassedMidBand,
         BypassedHighBand,
+
+        MuteLowBand,
+        MuteMidBand,
+        MuteHighBand,
+
+        SoloLowBand,
+        SoloMidBand,
+        SoloHighBand,
     };
 
     inline const std::map<Names, juce::String>& GetParams() {
@@ -68,6 +64,12 @@ namespace Params {
             { BypassedLowBand, "Bypassed Low Band"},
             { BypassedMidBand, "Bypassed Mid Band"},
             { BypassedHighBand, "Bypassed High Band"},
+            { MuteLowBand, "Mute Low Band"},
+            { MuteMidBand, "Mute Mid Band"},
+            { MuteHighBand, "Mute High Band"},
+            { SoloLowBand, "Solo Low Band"},
+            { SoloMidBand, "Solo Mid Band"},
+            { SoloHighBand, "Solo High Band"},
         };
         return params;
     }
@@ -80,6 +82,8 @@ public:
     juce::AudioParameterFloat* threshold{ nullptr };
     juce::AudioParameterChoice* ratio{ nullptr };
     juce::AudioParameterBool* bypassed{ nullptr };
+    juce::AudioParameterBool* mute{ nullptr };
+    juce::AudioParameterBool* solo{ nullptr };
 
     void prepare(const juce::dsp::ProcessSpec& spec) {
         compressor.prepare(spec);

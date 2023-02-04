@@ -35,7 +35,7 @@ const float DEFAULT_SKEW_FACTOR = 1.f;
 const auto RATIO_CHOICES = std::vector<double>{ 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 50, 100 };
 const float RATIO_DEFAULT = 3.f;
 
-const bool BYPASSED_DEFAULT = false;
+const bool APVTS_BOOL_DEFAULT = false;
 
 const float LOW_MID_MIN_FREQ = 20.f;
 const float LOW_MID_MAX_FREQ = 999.f;
