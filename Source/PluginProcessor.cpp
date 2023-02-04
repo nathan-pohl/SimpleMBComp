@@ -67,6 +67,9 @@ SimpleMBCompAudioProcessor::SimpleMBCompAudioProcessor()
     floatHelper(lowMidCrossover, Names::LowMidCrossoverFreq);
     floatHelper(midHighCrossover, Names::MidHighCrossoverFreq);
 
+    floatHelper(inputGainParam, Names::GainIn);
+    floatHelper(outputGainParam, Names::GainOut);
+
     LP1.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
     LP2.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
     HP1.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
@@ -162,10 +165,16 @@ void SimpleMBCompAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     HP2.prepare(spec);
     AP2.prepare(spec);
 
+    // null test all pass
     //invAP1.prepare(spec);
     //invAP2.prepare(spec);
-
     //invAPBuffer.setSize(spec.numChannels, samplesPerBlock);
+
+    inputGain.prepare(spec);
+    outputGain.prepare(spec);
+
+    inputGain.setRampDurationSeconds(0.05); // 50 ms
+    outputGain.setRampDurationSeconds(0.05);
 
     for (auto& buffer : filterBuffers) {
         buffer.setSize(spec.numChannels, samplesPerBlock);
@@ -204,33 +213,10 @@ bool SimpleMBCompAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
-void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
+void SimpleMBCompAudioProcessor::updateState() {
     for (auto& compressor : compressors) {
         compressor.updateCompressorSettings();
     }
-
-    // this wasn't explained in the video at all, but this for loop is actually populating the filterBuffers with
-    // copies of the buffer using the reference to each buffer in the array with 'auto& fb'
-    // this allows all the code below to let the LinkwitzRileyFilter work on the buffer
-    // while leaving the signal intact when the filter outputs are summed.
-    for (auto& fb : filterBuffers) {
-        fb = buffer;
-    }
-    //invAPBuffer = buffer;
 
     auto lowMidCutoff = lowMidCrossover->get();
     LP1.setCutoffFrequency(lowMidCutoff);
@@ -242,7 +228,20 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     LP2.setCutoffFrequency(midHighCutoff);
     HP2.setCutoffFrequency(midHighCutoff);
     //invAP2.setCutoffFrequency(midHighCutoff);
-    
+
+    inputGain.setGainDecibels(inputGainParam->get());
+    outputGain.setGainDecibels(outputGainParam->get());
+}
+
+void SimpleMBCompAudioProcessor::splitBands(const juce::AudioBuffer<float>& inputBuffer) {
+    // this wasn't explained in the video at all, but this for loop is actually populating the filterBuffers with
+    // copies of the buffer using the reference to each buffer in the array with 'auto& fb'
+    // this allows all the code below to let the LinkwitzRileyFilter work on the buffer
+    // while leaving the signal intact when the filter outputs are summed.
+    for (auto& fb : filterBuffers) {
+        fb = inputBuffer;
+    }
+
     auto fb0Block = juce::dsp::AudioBlock<float>(filterBuffers[0]);
     auto fb1Block = juce::dsp::AudioBlock<float>(filterBuffers[1]);
     auto fb2Block = juce::dsp::AudioBlock<float>(filterBuffers[2]);
@@ -261,6 +260,31 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     filterBuffers[2] = filterBuffers[1]; // copy the processed buffer into the third buffer, so each buffer is processed twice still
     LP2.process(fb1Ctx);
     HP2.process(fb2Ctx);
+}
+
+void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    // In case we have more outputs than inputs, this code clears any output
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    // This is here to avoid people getting screaming feedback
+    // when they first compile a plugin, but obviously you don't need to keep
+    // this code if your algorithm always overwrites all the output channels.
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear (i, 0, buffer.getNumSamples());
+
+    updateState();
+
+    applyGain(buffer, inputGain);
+
+    // null test
+    //invAPBuffer = buffer;
+
+    splitBands(buffer);
 
     for (size_t i = 0; i < filterBuffers.size(); ++i) {
         compressors[i].process(filterBuffers[i]);
@@ -315,6 +339,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //    }
     //    addFilterBand(buffer, invAPBuffer);
     //}
+
+    applyGain(buffer, outputGain);
 }
 
 //==============================================================================
@@ -350,6 +376,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleMBCompAudioProcessor::
     using namespace juce;
     using namespace Params;
     const auto& params = GetParams();
+
+    auto gainRange = NormalisableRange<float>(GAIN_MIN, GAIN_MAX, GAIN_INTERVAL, DEFAULT_SKEW_FACTOR);
+    layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::GainIn), params.at(Names::GainIn), gainRange, GAIN_DEFAULT));
+    layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::GainOut), params.at(Names::GainOut), gainRange, GAIN_DEFAULT));
 
     auto thresholdRange = NormalisableRange<float>(THRESHOLD_MIN_VAL, THRESHOLD_MAX_VAL, DEFAULT_INTERVAL, DEFAULT_SKEW_FACTOR);
     layout.add(std::make_unique<AudioParameterFloat>(params.at(Names::ThresholdLowBand), params.at(Names::ThresholdLowBand), thresholdRange, THRESHOLD_DEFAULT));
