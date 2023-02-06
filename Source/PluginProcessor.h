@@ -8,6 +8,24 @@
 
 #pragma once
 
+/*
+* GUI Roadmap
+* 1) Global Controls (x-over sliders, gain sliders)
+* 2) Main Band Control (attack, release, threshold, ratio)
+* 3) add solo/mute/bypass buttons
+* 4) Band Select Functionality
+* 5) Band Select Buttons reflect the solo/mute/bypass state
+* 6) Custom look and feel for sliders and toggle buttons
+* 7) Spectrum Analyzer Overview
+* 8) Data Structures for Spectrum Analyzer.
+* 9) FIFO usage in pluginProcessor::processBlock
+* 10) implementation of the analyzer rendering precomputed paths
+* 11) Drawing crossovers on top of the analyzer plot
+* 12) Drawing gain reduction on top of the analyzer
+* 13) Analyzer Bypass
+* 14) Global Bypass button
+*/
+
 #include <JuceHeader.h>
 #include "Constants.h"
 

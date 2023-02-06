@@ -12,11 +12,11 @@
 #include <JuceHeader.h>
 
 // APVTS Names
-const juce::String THRESHOLD_NAME = "Threshold";
-const juce::String ATTACK_NAME = "Attack";
-const juce::String RELEASE_NAME = "Release";
-const juce::String RATIO_NAME = "Ratio";
-const juce::String BYPASS_NAME = "Bypassed";
+//const juce::String THRESHOLD_NAME = "Threshold";
+//const juce::String ATTACK_NAME = "Attack";
+//const juce::String RELEASE_NAME = "Release";
+//const juce::String RATIO_NAME = "Ratio";
+//const juce::String BYPASS_NAME = "Bypassed";
 
 //==============================================================================
 // Ranges
@@ -48,3 +48,9 @@ const float GAIN_MIN = -24.f;
 const float GAIN_MAX = 24.f;
 const float GAIN_INTERVAL = 0.5f;
 const float GAIN_DEFAULT = 0.f;
+
+//==============================================================================
+// GUI Values
+const int CONTROL_BAR_HEIGHT = 32;
+const int BAND_CONTROLS_HEIGHT = 135;
+const int ANALYZER_HEIGHT = 225;
