@@ -49,10 +49,30 @@ const float GAIN_MAX = 24.f;
 const float GAIN_INTERVAL = 0.5f;
 const float GAIN_DEFAULT = 0.f;
 
+const float SLIDER_MIN_RANGE = 0.f;
+const double SLIDER_MIN_RANGE_DOUBLE = 0.0;
+const float SLIDER_MAX_RANGE = 1.f;
+const double SLIDER_MAX_RANGE_DOUBLE = 1.0;
+
 //==============================================================================
 // GUI Values
+const float UI_BOUNDS_HALF = 0.5f;
+
+const float FLEX_DEFAULT = 1.f;
+
 const int CONTROL_BAR_HEIGHT = 32;
 const int BAND_CONTROLS_HEIGHT = 135;
 const int ANALYZER_HEIGHT = 225;
 
+const int SLIDER_X_PADDING = 2;
+
+const int NUMBER_OF_LINES_TEXT = 1;
+
 const int BORDER_THICKNESS = 3;
+const float ELLIPSE_DEFAULT_THICKNESS = 1.f;
+const float ELLIPSE_THICKER_OUTLINE = 2.f;
+const float ROUNDED_RECTANGLE_THICKNESS = 2.f;
+const float PATH_STROKE_THICKNESS = 1.f;
+
+const int TEXT_BOUNDING_BOX_ADD_WIDTH = 4;
+const int TEXT_BOUNDING_BOX_ADD_HEIGHT = 2;
