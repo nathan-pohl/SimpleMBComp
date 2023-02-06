@@ -54,3 +54,5 @@ const float GAIN_DEFAULT = 0.f;
 const int CONTROL_BAR_HEIGHT = 32;
 const int BAND_CONTROLS_HEIGHT = 135;
 const int ANALYZER_HEIGHT = 225;
+
+const int BORDER_THICKNESS = 3;
