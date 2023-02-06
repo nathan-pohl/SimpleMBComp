@@ -55,15 +55,25 @@ const float SLIDER_MAX_RANGE = 1.f;
 const double SLIDER_MAX_RANGE_DOUBLE = 1.0;
 
 //==============================================================================
+// Units
+const juce::String HZ = "Hz";
+const juce::String KILO_HZ = "KHz";
+const juce::String DB = "dB";
+const juce::String DB_PER_OCT = "db/Oct";
+
+//==============================================================================
 // GUI Values
 const float UI_BOUNDS_HALF = 0.5f;
 
 const float FLEX_DEFAULT = 1.f;
+const int FLEX_SPACER = 4;
+const int FLEX_END_CAP = 6;
 
 const int CONTROL_BAR_HEIGHT = 32;
 const int BAND_CONTROLS_HEIGHT = 135;
 const int ANALYZER_HEIGHT = 225;
 
+const int DEFAULT_PADDING = 5;
 const int SLIDER_X_PADDING = 2;
 
 const int NUMBER_OF_LINES_TEXT = 1;
