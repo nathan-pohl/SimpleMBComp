@@ -11,12 +11,11 @@
 #pragma once
 #include <JuceHeader.h>
 
-// APVTS Names
-//const juce::String THRESHOLD_NAME = "Threshold";
-//const juce::String ATTACK_NAME = "Attack";
-//const juce::String RELEASE_NAME = "Release";
-//const juce::String RATIO_NAME = "Ratio";
-//const juce::String BYPASS_NAME = "Bypassed";
+// GUI Labels (Visible to user)
+const juce::String GAIN_IN_LABEL = "INPUT TRIM";
+const juce::String LOW_MID_XOVER_LABEL = "LOW-MID X-OVER";
+const juce::String MID_HIGH_XOVER_LABEL = "MID-HI X-OVER";
+const juce::String GAIN_OUT_LABEL = "OUTPUT TRIM";
 
 //==============================================================================
 // Ranges
@@ -64,6 +63,7 @@ const juce::String DB_PER_OCT = "db/Oct";
 //==============================================================================
 // GUI Values
 const float UI_BOUNDS_HALF = 0.5f;
+const float TEXT_HEIGHT_MULTIPLIER = 1.5f;
 
 const float FLEX_DEFAULT = 1.f;
 const int FLEX_SPACER = 4;
