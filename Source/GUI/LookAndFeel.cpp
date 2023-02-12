@@ -9,7 +9,7 @@
 */
 
 #include "LookAndFeel.h"
-#include "Constants.h"
+#include "../Constants.h"
 #include "RotarySliderWithLabels.h"
 #include "CustomButtons.h"
 

@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "Constants.h"
+#include "../Constants.h"
 
 struct RotarySliderWithLabels : juce::Slider {
     RotarySliderWithLabels(juce::RangedAudioParameter* param,

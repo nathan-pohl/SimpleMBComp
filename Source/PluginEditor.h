@@ -10,10 +10,10 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "LookAndFeel.h"
-#include "UtilityComponents.h"
-#include "GlobalControls.h"
-#include "CompressorBandControls.h"
+#include "GUI/LookAndFeel.h"
+#include "GUI/UtilityComponents.h"
+#include "GUI/GlobalControls.h"
+#include "GUI/CompressorBandControls.h"
 
 class SimpleMBCompAudioProcessorEditor  : public juce::AudioProcessorEditor
 {

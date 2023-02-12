@@ -9,7 +9,7 @@
 */
 
 #include "Utilities.h"
-#include "Constants.h"
+#include "../Constants.h"
 
 template<typename T>
 bool truncateKiloValue(T& value) {

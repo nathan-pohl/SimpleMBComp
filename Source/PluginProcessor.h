@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 #include "Constants.h"
-#include "CompressorBand.h"
+#include "DSP/CompressorBand.h"
 
 
 //==============================================================================
