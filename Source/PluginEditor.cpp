@@ -112,6 +112,18 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g, juce::ToggleButton& toggle
         g.drawRect(bounds);
         g.strokePath(analyzerButton->randomPath, PathStrokeType(PATH_STROKE_THICKNESS));
     }
+    else {
+        // Draw a rounded rectangle with component name in middle
+        auto bounds = toggleButton.getLocalBounds().reduced(TOGGLE_BUTTON_PADDING);
+        auto buttonIsOn = toggleButton.getToggleState();
+        const int cornerSize = 4;
+        g.setColour(buttonIsOn ? juce::Colours::white : juce::Colours::black);
+        g.fillRoundedRectangle(bounds.toFloat(), cornerSize);
+
+        g.setColour(buttonIsOn ? juce::Colours::black : juce::Colours::white);
+        g.drawRoundedRectangle(bounds.toFloat(), cornerSize, PATH_STROKE_THICKNESS);
+        g.drawFittedText(toggleButton.getName(), bounds, juce::Justification::centred, 1);
+    }
 }
 
 //==============================================================================
@@ -282,17 +294,6 @@ CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeStat
     // this abomination gets the last choice which is 100, and adds a string to the end to make it look like a ratio
     ratioSlider.labels.add({ 1.0f, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
 
-    //auto& attackParam = getParamHelper(Names::GainIn);
-    //auto& releaseParam = getParamHelper(Names::LowMidCrossoverFreq);
-    //auto& thresholdParam = getParamHelper(Names::MidHighCrossoverFreq);
-    //auto& ratioParam = getParamHelper(Names::GainOut);
-
-    //inGainSlider = std::make_unique<RSWL>(gainInParam, DB, GAIN_IN_LABEL);
-    //lowMidXoverSlider = std::make_unique<RSWL>(lowMidCrossoverParam, HZ, LOW_MID_XOVER_LABEL);
-    //midHighXoverSlider = std::make_unique<RSWL>(midHighCrossoverParam, HZ, MID_HIGH_XOVER_LABEL);
-    //outGainSlider = std::make_unique<RSWL>(gainOutParam, DB, GAIN_OUT_LABEL);
-
-
     auto makeAttachmentHelper = [&params, &apvts = this->apvts](auto& attachment, const auto& name, auto& slider) {
         makeAttachment(attachment, apvts, params, name, slider);
     };
@@ -306,6 +307,30 @@ CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeStat
     addAndMakeVisible(releaseSlider);
     addAndMakeVisible(thresholdSlider);
     addAndMakeVisible(ratioSlider);
+
+    bypassButton.setName(BYPASSED_LABEL);
+    soloButton.setName(SOLO_LABEL);
+    muteButton.setName(MUTE_LABEL);
+
+    makeAttachmentHelper(bypassButtonAttachment, Names::BypassedMidBand, bypassButton);
+    makeAttachmentHelper(soloButtonAttachment, Names::SoloMidBand, soloButton);
+    makeAttachmentHelper(muteButtonAttachment, Names::MuteMidBand, muteButton);
+
+    addAndMakeVisible(bypassButton);
+    addAndMakeVisible(soloButton);
+    addAndMakeVisible(muteButton);
+
+    lowBand.setName(LOW_BUTTON_LABEL);
+    midBand.setName(MID_BUTTON_LABEL);
+    highBand.setName(HIGH_BUTTON_LABEL);
+
+    lowBand.setRadioGroupId(1);
+    midBand.setRadioGroupId(1);
+    highBand.setRadioGroupId(1);
+
+    addAndMakeVisible(lowBand);
+    addAndMakeVisible(midBand);
+    addAndMakeVisible(highBand);
 }
 
 void CompressorBandControls::paint(juce::Graphics& g) {
@@ -317,6 +342,25 @@ void CompressorBandControls::resized() {
     auto bounds = getLocalBounds().reduced(DEFAULT_PADDING);
     using namespace juce;
 
+    auto createBandButtonControlBox = [](std::vector<Component*> comps) {
+        FlexBox flexBox;
+        flexBox.flexDirection = FlexBox::Direction::column;
+        flexBox.flexWrap = FlexBox::Wrap::noWrap;
+
+        auto spacer = FlexItem().withHeight(FLEX_HEIGHT_SPACER);
+
+        for (auto* comp : comps) {
+            flexBox.items.add(spacer);
+            flexBox.items.add(FlexItem(*comp).withFlex(FLEX_DEFAULT));
+        }
+        flexBox.items.add(spacer);
+
+        return flexBox;
+    };
+
+    auto bandButtonControlBox = createBandButtonControlBox({&bypassButton, &soloButton, &muteButton});
+    auto bandSelectControlBox = createBandButtonControlBox({ &lowBand, &midBand, &highBand });
+
     FlexBox flexBox;
     flexBox.flexDirection = FlexBox::Direction::row;
     flexBox.flexWrap = FlexBox::Wrap::noWrap;
@@ -324,7 +368,9 @@ void CompressorBandControls::resized() {
     auto spacer = FlexItem().withWidth(FLEX_SPACER);
     auto endCap = FlexItem().withWidth(FLEX_END_CAP);
 
-    flexBox.items.add(endCap);
+    flexBox.items.add(spacer);
+    flexBox.items.add(FlexItem(bandSelectControlBox).withWidth(FLEX_BAND_SELECT_WIDTH));
+    flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(attackSlider).withFlex(FLEX_DEFAULT));
     flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(releaseSlider).withFlex(FLEX_DEFAULT));
@@ -332,7 +378,9 @@ void CompressorBandControls::resized() {
     flexBox.items.add(FlexItem(thresholdSlider).withFlex(FLEX_DEFAULT));
     flexBox.items.add(spacer);
     flexBox.items.add(FlexItem(ratioSlider).withFlex(FLEX_DEFAULT));
-    flexBox.items.add(endCap);
+    //flexBox.items.add(endCap);
+    flexBox.items.add(spacer);
+    flexBox.items.add(FlexItem(bandButtonControlBox).withWidth(FLEX_BAND_CONTROL_WIDTH));
 
     flexBox.performLayout(bounds);
 }
