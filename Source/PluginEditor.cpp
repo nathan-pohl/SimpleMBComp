@@ -272,37 +272,6 @@ CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeStat
     thresholdSlider(nullptr, DB, THRESHOLD_LABEL),
     ratioSlider(nullptr, "")
 {
-    //using namespace Params;
-    //const auto& params = GetParams();
-
-    //auto getParamHelper = [&params, &apvts = this->apvts](const auto& name) -> auto& {
-    //    return getParam(apvts, params, name);
-    //};
-
-    //attackSlider.changeParam(&getParamHelper(Names::AttackMidBand));
-    //releaseSlider.changeParam(&getParamHelper(Names::ReleaseMidBand));
-    //thresholdSlider.changeParam(&getParamHelper(Names::ThresholdMidBand));
-    //ratioSlider.changeParam(&getParamHelper(Names::RatioMidBand));
-
-    //addLabelPairs(attackSlider.labels, getParamHelper(Names::AttackMidBand), MS);
-    //addLabelPairs(releaseSlider.labels, getParamHelper(Names::ReleaseMidBand), MS);
-    //addLabelPairs(thresholdSlider.labels, getParamHelper(Names::ThresholdMidBand), DB);
-
-    //// We can't cleanly show the ends of these params, need to use strings of the ratios which will make sense to the user
-    //ratioSlider.labels.add({ 0.f, "1:1" });
-    //auto ratioParam = dynamic_cast<juce::AudioParameterChoice*>(&getParamHelper(Names::RatioMidBand));
-    //// this abomination gets the last choice which is 100, and adds a string to the end to make it look like a ratio
-    //ratioSlider.labels.add({ 1.0f, juce::String(ratioParam->choices.getReference(ratioParam->choices.size() - 1).getIntValue()) + ":1"});
-
-   /* auto makeAttachmentHelper = [&params, &apvts = this->apvts](auto& attachment, const auto& name, auto& slider) {
-        makeAttachment(attachment, apvts, params, name, slider);
-    };
-
-    makeAttachmentHelper(attackSliderAttachment, Names::AttackMidBand, attackSlider);
-    makeAttachmentHelper(releaseSliderAttachment, Names::ReleaseMidBand, releaseSlider);
-    makeAttachmentHelper(thresholdSliderAttachment, Names::ThresholdMidBand, thresholdSlider);
-    makeAttachmentHelper(ratioSliderAttachment, Names::RatioMidBand, ratioSlider);*/
-
     addAndMakeVisible(attackSlider);
     addAndMakeVisible(releaseSlider);
     addAndMakeVisible(thresholdSlider);
@@ -311,10 +280,6 @@ CompressorBandControls::CompressorBandControls(juce::AudioProcessorValueTreeStat
     bypassButton.setName(BYPASSED_LABEL);
     soloButton.setName(SOLO_LABEL);
     muteButton.setName(MUTE_LABEL);
-
-    //makeAttachmentHelper(bypassButtonAttachment, Names::BypassedMidBand, bypassButton);
-    //makeAttachmentHelper(soloButtonAttachment, Names::SoloMidBand, soloButton);
-    //makeAttachmentHelper(muteButtonAttachment, Names::MuteMidBand, muteButton);
 
     addAndMakeVisible(bypassButton);
     addAndMakeVisible(soloButton);
