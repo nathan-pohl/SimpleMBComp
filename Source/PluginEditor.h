@@ -151,6 +151,9 @@ private:
                                 muteButtonAttachment;
 
     juce::ToggleButton bypassButton, soloButton, muteButton, lowBand, midBand, highBand;
+    juce::Component::SafePointer<CompressorBandControls> safePtr{ this };
+
+    void updateAttachments();
 };
 
 //==============================================================================
