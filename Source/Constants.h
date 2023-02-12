@@ -17,6 +17,11 @@ const juce::String LOW_MID_XOVER_LABEL = "LOW-MID X-OVER";
 const juce::String MID_HIGH_XOVER_LABEL = "MID-HI X-OVER";
 const juce::String GAIN_OUT_LABEL = "OUTPUT TRIM";
 
+const juce::String ATTACK_LABEL = "ATTACK";
+const juce::String RELEASE_LABEL = "RELEASE";
+const juce::String THRESHOLD_LABEL = "THRESH";
+const juce::String RATIO_LABEL = "RATIO";
+
 //==============================================================================
 // Ranges
 const float THRESHOLD_MIN_VAL = -60.f;
@@ -59,6 +64,7 @@ const juce::String HZ = "Hz";
 const juce::String KILO_HZ = "KHz";
 const juce::String DB = "dB";
 const juce::String DB_PER_OCT = "db/Oct";
+const juce::String MS = "ms";
 
 //==============================================================================
 // GUI Values

@@ -29,19 +29,14 @@ struct LookAndFeel : juce::LookAndFeel_V4 {
 
 //==============================================================================
 struct RotarySliderWithLabels : juce::Slider {
-    RotarySliderWithLabels(juce::RangedAudioParameter& param, 
+    RotarySliderWithLabels(juce::RangedAudioParameter* param, 
                            const juce::String suffixStr, 
                            const juce::String& title) : 
         juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
-        param(&param),
+        param(param),
         suffix(suffixStr)
     {
         setName(title);
-        setLookAndFeel(&lookAndFeel);
-    }
-
-    ~RotarySliderWithLabels() {
-        setLookAndFeel(nullptr);
     }
 
     struct LabelPos {
@@ -54,12 +49,18 @@ struct RotarySliderWithLabels : juce::Slider {
     void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const { return 14; }
-    juce::String getDisplayString() const;
-private:
-    LookAndFeel lookAndFeel;
+    virtual juce::String getDisplayString() const;
+    void changeParam(juce::RangedAudioParameter* p);
 
+protected:
     juce::RangedAudioParameter* param;
     juce::String suffix;
+};
+
+struct RatioSlider : RotarySliderWithLabels {
+    RatioSlider(juce::RangedAudioParameter* param, const juce::String suffixStr) : RotarySliderWithLabels(param, suffixStr, RATIO_LABEL) {}
+
+    juce::String getDisplayString() const override;
 };
 
 //==============================================================================
@@ -125,6 +126,26 @@ void addLabelPairs(Labels& labels, const ParamType& param, const SuffixType& suf
     labels.add({ 0.f, getValString(param, true, suffix)}); // Minimum value at 0%
     labels.add({ 1.f, getValString(param, false, suffix)}); // Maximum value at 100%
 }
+
+//==============================================================================
+struct CompressorBandControls : juce::Component {
+    CompressorBandControls(juce::AudioProcessorValueTreeState& apvts);
+
+    void paint(juce::Graphics& g) override;
+    void resized() override;
+private:
+    juce::AudioProcessorValueTreeState& apvts;
+
+    RotarySliderWithLabels attackSlider, releaseSlider, thresholdSlider;
+    RatioSlider ratioSlider;
+
+    using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    std::unique_ptr<Attachment> attackSliderAttachment,
+                                releaseSliderAttachment,
+                                thresholdSliderAttachment,
+                                ratioSliderAttachment;
+};
+
 //==============================================================================
 struct GlobalControls : juce::Component {
     GlobalControls(juce::AudioProcessorValueTreeState& apvts);
@@ -154,12 +175,15 @@ public:
     void resized() override;
 
 private:
+    LookAndFeel lookAndFeel;
+
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SimpleMBCompAudioProcessor& audioProcessor;
 
-    Placeholder controlBar, analyzer, bandControls;
+    Placeholder controlBar, analyzer;
     GlobalControls globalControls { audioProcessor.apvts };
+    CompressorBandControls bandControls { audioProcessor.apvts };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMBCompAudioProcessorEditor)
 };
