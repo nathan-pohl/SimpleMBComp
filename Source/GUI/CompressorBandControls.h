@@ -40,7 +40,13 @@ private:
     juce::ToggleButton bypassButton, soloButton, muteButton, lowBand, midBand, highBand;
     juce::Component::SafePointer<CompressorBandControls> safePtr{ this };
 
+    juce::ToggleButton* activeBand = &lowBand;
+
     void updateAttachments();
     void updateSliderEnablements();
     void updateSoloMuteBypassToggleStates(juce::Button& button);
+    void updateActiveBandFillColors(juce::Button& clickedButton);
+    void resetActiveBandColors();
+    static void refreshBandButtonColors(juce::Button& band, juce::Button& colorSource);
+    void updateBandSelectButtonStates();
 };
