@@ -66,6 +66,8 @@ const double SLIDER_MIN_RANGE_DOUBLE = 0.0;
 const float SLIDER_MAX_RANGE = 1.f;
 const double SLIDER_MAX_RANGE_DOUBLE = 1.0;
 
+const float ABSOLUTE_MINIMUM_GAIN = -48.f; // Scale only goes to -48dB
+
 //==============================================================================
 // Units
 const juce::String HZ = "Hz";
@@ -93,6 +95,7 @@ const int ANALYZER_HEIGHT = 225;
 const int DEFAULT_PADDING = 5;
 const int SLIDER_X_PADDING = 2;
 const int TOGGLE_BUTTON_PADDING = 2;
+const int ANALYSIS_AREA_PADDING = 4;
 
 const int NUMBER_OF_LINES_TEXT = 1;
 
@@ -104,3 +107,7 @@ const float PATH_STROKE_THICKNESS = 1.f;
 
 const int TEXT_BOUNDING_BOX_ADD_WIDTH = 4;
 const int TEXT_BOUNDING_BOX_ADD_HEIGHT = 2;
+
+const int RESPONSE_CURVE_TOP_REMOVAL = 12;
+const int RESPONSE_CURVE_BOTTOM_REMOVAL = 2;
+const int RESPONSE_CURVE_SIDE_REMOVAL = 20;
