@@ -290,7 +290,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     updateState();
 
-    if (true) {
+    // sine wave to test the spectrum analyzer
+    if (false) {
         buffer.clear();
         auto block = juce::dsp::AudioBlock<float>(buffer);
         auto ctx = juce::dsp::ProcessContextReplacing<float>(block);

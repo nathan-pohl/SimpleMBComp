@@ -10,6 +10,7 @@
 
 #include "SpectrumAnalyzer.h"
 #include "../Constants.h"
+#include "Utilities.h"
 
 //==============================================================================
 SpectrumAnalyzer::SpectrumAnalyzer(SimpleMBCompAudioProcessor& p) :
@@ -37,8 +38,9 @@ void SpectrumAnalyzer::parameterValueChanged(int parameterIndex, float newValue)
 
 void SpectrumAnalyzer::timerCallback() {
     if (shouldShowFFTAnlaysis) {
-        juce::Rectangle<float> fftBounds = getAnalysisArea().toFloat();
-        fftBounds.setBottom(getLocalBounds().getBottom());
+        auto bounds = getLocalBounds();
+        juce::Rectangle<float> fftBounds = getAnalysisArea(bounds).toFloat();
+        fftBounds.setBottom(bounds.getBottom());
         double sampleRate = audioProcessor.getSampleRate();
 
         leftPathProducer.process(fftBounds, sampleRate);
@@ -57,9 +59,11 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
     using namespace juce;
     g.fillAll(Colours::black);
 
-    drawBackgroundGrid(g);
+    auto bounds = drawModuleBackground(g, getLocalBounds());
 
-    Rectangle<int> responseArea = getAnalysisArea();
+    drawBackgroundGrid(g, bounds);
+
+    Rectangle<int> responseArea = getAnalysisArea(bounds);
 
     if (shouldShowFFTAnlaysis) {
         Path leftChannelFFTPath = leftPathProducer.getPath();
@@ -81,30 +85,31 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
 
     Path border;
     border.setUsingNonZeroWinding(false);
-    border.addRoundedRectangle(getRenderArea(), ANALYSIS_AREA_PADDING);
+    border.addRoundedRectangle(getRenderArea(bounds), ANALYSIS_AREA_PADDING);
     border.addRectangle(getLocalBounds());
 
     g.setColour(Colours::black);
-    g.fillPath(border);
-    drawTextLabels(g);
+    //g.fillPath(border);
+    drawTextLabels(g, bounds);
     g.setColour(Colours::orange);
-    g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
+    g.drawRoundedRectangle(getRenderArea(bounds).toFloat(), 4.f, 1.f);
 }
 
 void SpectrumAnalyzer::resized() {
     using namespace juce;
-    auto fftBounds = getAnalysisArea().toFloat();
-    auto negInf = jmap(getLocalBounds().toFloat().getBottom(), fftBounds.getBottom(), fftBounds.getY(), ABSOLUTE_MINIMUM_GAIN, GAIN_DEFAULT);
+    auto bounds = getLocalBounds();
+    auto fftBounds = getAnalysisArea(bounds).toFloat();
+    auto negInf = jmap(bounds.toFloat().getBottom(), fftBounds.getBottom(), fftBounds.getY(), ABSOLUTE_MINIMUM_GAIN, GAIN_DEFAULT);
     // DBG("Negative Infinity: " << negInf);
     leftPathProducer.updateNegativeInfinity(negInf);
     rightPathProducer.updateNegativeInfinity(negInf);
 }
 
-void SpectrumAnalyzer::drawBackgroundGrid(juce::Graphics& g) {
+void SpectrumAnalyzer::drawBackgroundGrid(juce::Graphics& g, juce::Rectangle<int> bounds) {
     using namespace juce;
     auto freqs = getFrequencies();
 
-    Rectangle<int> renderArea = getAnalysisArea();
+    Rectangle<int> renderArea = getAnalysisArea(bounds);
     int left = renderArea.getX();
     int right = renderArea.getRight();
     int top = renderArea.getY();
@@ -128,13 +133,13 @@ void SpectrumAnalyzer::drawBackgroundGrid(juce::Graphics& g) {
     }
 }
 
-void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g) {
+void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bounds) {
     using namespace juce;
     g.setColour(Colours::lightgrey);
     const int fontHeight = 10;
     g.setFont(fontHeight);
 
-    Rectangle<int> renderArea = getAnalysisArea();
+    Rectangle<int> renderArea = getAnalysisArea(bounds);
     int left = renderArea.getX();
     int top = renderArea.getY();
     int bottom = renderArea.getBottom();
@@ -222,8 +227,8 @@ std::vector<float> SpectrumAnalyzer::getXs(const std::vector<float>& freqs, floa
     return xs;
 }
 
-juce::Rectangle<int> SpectrumAnalyzer::getRenderArea() {
-    juce::Rectangle<int> bounds = getLocalBounds();
+juce::Rectangle<int> SpectrumAnalyzer::getRenderArea(juce::Rectangle<int> bounds) {
+    //juce::Rectangle<int> bounds = getLocalBounds();
 
     /*bounds.reduce(JUCE_LIVE_CONSTANT(10),
         JUCE_LIVE_CONSTANT(8));*/
@@ -236,8 +241,8 @@ juce::Rectangle<int> SpectrumAnalyzer::getRenderArea() {
     return bounds;
 }
 
-juce::Rectangle<int> SpectrumAnalyzer::getAnalysisArea() {
-    juce::Rectangle<int> bounds = getRenderArea();
+juce::Rectangle<int> SpectrumAnalyzer::getAnalysisArea(juce::Rectangle<int> bounds) {
+    bounds = getRenderArea(bounds);
     bounds.removeFromTop(ANALYSIS_AREA_PADDING);
     bounds.removeFromBottom(ANALYSIS_AREA_PADDING);
     return bounds;
