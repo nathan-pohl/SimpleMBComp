@@ -11,6 +11,7 @@
 #include "SpectrumAnalyzer.h"
 #include "../Constants.h"
 #include "Utilities.h"
+#include "../DSP/Params.h"
 
 //==============================================================================
 SpectrumAnalyzer::SpectrumAnalyzer(SimpleMBCompAudioProcessor& p) :
@@ -21,6 +22,20 @@ SpectrumAnalyzer::SpectrumAnalyzer(SimpleMBCompAudioProcessor& p) :
     for (juce::AudioProcessorParameter* param : params) {
         param->addListener(this);
     }
+    using namespace Params;
+    const auto& paramNames = GetParams();
+    
+    auto floatHelper = [&apvts = audioProcessor.apvts, &paramNames](auto& param, const auto& paramName) {
+        param = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(paramNames.at(paramName)));
+        jassert(param != nullptr);
+    };
+
+    floatHelper(lowMidXoverParam, Names::LowMidCrossoverFreq);
+    floatHelper(midHighXoverParam, Names::MidHighCrossoverFreq);
+
+    floatHelper(lowThresholdParam, Names::ThresholdLowBand);
+    floatHelper(midThresholdParam, Names::ThresholdMidBand);
+    floatHelper(highThresholdParam, Names::ThresholdHighBand);
 
     startTimerHz(60);
 }
@@ -66,16 +81,8 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
         drawFFTAnalysis(g, bounds);
     }
 
-    //Path border;
-    //border.setUsingNonZeroWinding(false);
-    //border.addRoundedRectangle(getRenderArea(bounds), ANALYSIS_AREA_PADDING);
-    //border.addRectangle(getLocalBounds());
-
-    //g.setColour(Colours::black);
-    //g.fillPath(border);
+    drawCrossovers(g, bounds);
     drawTextLabels(g, bounds);
-    //g.setColour(Colours::orange);
-    //g.drawRoundedRectangle(getRenderArea(bounds).toFloat(), 4.f, 1.f);
 }
 
 void SpectrumAnalyzer::resized() {
@@ -110,7 +117,7 @@ void SpectrumAnalyzer::drawBackgroundGrid(juce::Graphics& g, juce::Rectangle<int
     std::vector<float> gain = getGains();
 
     for (float gDb : gain) {
-        float y = jmap(gDb, NEGATIVE_INFINITY, MAX_DECIBELS, float(getHeight()), 0.f);
+        float y = jmap(gDb, NEGATIVE_INFINITY, MAX_DECIBELS, float(bottom), float(top));
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::darkgrey); // If gain is 0dB draw a green line, otherwise use dark grey
         g.drawHorizontalLine(y, left, right);
     }
@@ -166,20 +173,15 @@ void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bo
 
         int textWidth = g.getCurrentFont().getStringWidth(str);
         Rectangle<int> r;
+        // draw bounds on right side
         r.setSize(textWidth, fontHeight);
         r.setX(bounds.getRight() - textWidth);
         r.setCentre(r.getCentreX(), y);
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::lightgrey); // If gain is 0dB draw a green line, otherwise use light grey
         g.drawFittedText(str, r, juce::Justification::centred, NUMBER_OF_LINES_TEXT);
 
-        // draw labels on left side of response curve for the spectrum analyzer
-        // the range here needs to go from 0dB to -48dB, so we can simply subtract 24dB from our existing gain array to get these numbers
-        //str.clear();
-        //str << (gDb - 24.f);
+        // draw labels on left side of analyzer
         r.setX(bounds.getX() + 1);
-        //textWidth = g.getCurrentFont().getStringWidth(str);
-        //r.setSize(textWidth, fontHeight);
-        //g.setColour(Colours::lightgrey);
         g.drawFittedText(str, r, juce::Justification::centred, NUMBER_OF_LINES_TEXT);
     }
 }
@@ -207,7 +209,7 @@ std::vector<float> SpectrumAnalyzer::getGains() {
 std::vector<float> SpectrumAnalyzer::getXs(const std::vector<float>& freqs, float left, float width) {
     std::vector<float> xs;
     for (auto f : freqs) {
-        auto normX = juce::mapFromLog10(f, 20.f, 20000.f);
+        auto normX = juce::mapFromLog10(f, MIN_FREQ, MAX_FREQ);
         xs.push_back(left + width * normX);
     }
 
@@ -250,4 +252,34 @@ void SpectrumAnalyzer::drawFFTAnalysis(juce::Graphics& g, juce::Rectangle<int> b
     // draw the right path using light yellow
     g.setColour(Colours::lightyellow);
     g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
+}
+
+void SpectrumAnalyzer::drawCrossovers(juce::Graphics& g, juce::Rectangle<int> bounds) {
+    using namespace juce;
+    bounds = getAnalysisArea(bounds);
+
+    const auto top = bounds.getY();
+    const auto bottom = bounds.getBottom();
+    const auto left = bounds.getX();
+    const auto right = bounds.getRight();
+
+    auto mapX = [left = bounds.getX(), width = bounds.getWidth()](float frequency) {
+        auto normX = mapFromLog10(frequency, MIN_FREQ, MAX_FREQ);
+        return left + width * normX;
+    };
+
+    auto mapY = [bottom, top](float db) {
+        return jmap(db, NEGATIVE_INFINITY, MAX_DECIBELS, float(bottom), (float)top);
+    };
+
+    auto lowMidX = mapX(lowMidXoverParam->get());
+    auto midHighX = mapX(midHighXoverParam->get());
+    g.setColour(Colours::orange);
+    g.drawVerticalLine(lowMidX, top, bottom);
+    g.drawVerticalLine(midHighX, top, bottom);
+
+    g.setColour(Colours::yellow);
+    g.drawHorizontalLine(mapY(lowThresholdParam->get()), left, lowMidX);
+    g.drawHorizontalLine(mapY(midThresholdParam->get()), lowMidX, midHighX);
+    g.drawHorizontalLine(mapY(highThresholdParam->get()), midHighX, right);
 }

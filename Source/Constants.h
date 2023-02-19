@@ -56,6 +56,10 @@ const float MID_HIGH_MAX_FREQ = 20000.f; // 20 kHz
 const float LOW_MID_CROSSOVER_DEFAULT_FREQUENCY = 400.f;
 const float MID_HIGH_CROSSOVER_DEFAULT_FREQUENCY = 2000.f;
 
+const float MIN_FREQ = 20.f;
+const float MAX_FREQ = 20000.f; // 20 kHz
+
+
 const float GAIN_MIN = -24.f;
 const float GAIN_MAX = 24.f;
 const float GAIN_INTERVAL = 0.5f;
