@@ -82,7 +82,7 @@ void SpectrumAnalyzer::resized() {
     using namespace juce;
     auto bounds = getLocalBounds();
     auto fftBounds = getAnalysisArea(bounds).toFloat();
-    auto negInf = jmap(bounds.toFloat().getBottom(), fftBounds.getBottom(), fftBounds.getY(), ABSOLUTE_MINIMUM_GAIN, GAIN_DEFAULT);
+    auto negInf = jmap(bounds.toFloat().getBottom(), fftBounds.getBottom(), fftBounds.getY(), NEGATIVE_INFINITY, MAX_DECIBELS);
     // DBG("Negative Infinity: " << negInf);
     leftPathProducer.updateNegativeInfinity(negInf);
     rightPathProducer.updateNegativeInfinity(negInf);
@@ -110,7 +110,7 @@ void SpectrumAnalyzer::drawBackgroundGrid(juce::Graphics& g, juce::Rectangle<int
     std::vector<float> gain = getGains();
 
     for (float gDb : gain) {
-        float y = jmap(gDb, GAIN_MIN, GAIN_MAX, float(getHeight()), 0.f);
+        float y = jmap(gDb, NEGATIVE_INFINITY, MAX_DECIBELS, float(getHeight()), 0.f);
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::darkgrey); // If gain is 0dB draw a green line, otherwise use dark grey
         g.drawHorizontalLine(y, left, right);
     }
@@ -157,7 +157,7 @@ void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bo
 
     std::vector<float> gain = getGains();
     for (float gDb : gain) {
-        float y = jmap(gDb, GAIN_MIN, GAIN_MAX, float(bottom), float(top));
+        float y = jmap(gDb, NEGATIVE_INFINITY, MAX_DECIBELS, float(bottom), float(top));
         String str;
         if (gDb > 0) {
             str << "+";
@@ -174,12 +174,12 @@ void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bo
 
         // draw labels on left side of response curve for the spectrum analyzer
         // the range here needs to go from 0dB to -48dB, so we can simply subtract 24dB from our existing gain array to get these numbers
-        str.clear();
-        str << (gDb - 24.f);
+        //str.clear();
+        //str << (gDb - 24.f);
         r.setX(bounds.getX() + 1);
-        textWidth = g.getCurrentFont().getStringWidth(str);
-        r.setSize(textWidth, fontHeight);
-        g.setColour(Colours::lightgrey);
+        //textWidth = g.getCurrentFont().getStringWidth(str);
+        //r.setSize(textWidth, fontHeight);
+        //g.setColour(Colours::lightgrey);
         g.drawFittedText(str, r, juce::Justification::centred, NUMBER_OF_LINES_TEXT);
     }
 }
@@ -194,10 +194,14 @@ std::vector<float> SpectrumAnalyzer::getFrequencies() {
 }
 
 std::vector<float> SpectrumAnalyzer::getGains() {
-    return std::vector<float>
-    {
-        -24, -12, 0, 12, 24
-    };
+    std::vector<float> values;
+
+    auto increment = MAX_DECIBELS; // 12 db steps
+    for (auto db = NEGATIVE_INFINITY; db <= MAX_DECIBELS; db += increment) {
+        values.push_back(db);
+    }
+
+    return values;
 }
 
 std::vector<float> SpectrumAnalyzer::getXs(const std::vector<float>& freqs, float left, float width) {

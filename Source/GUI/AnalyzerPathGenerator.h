@@ -26,7 +26,7 @@ struct AnalyzerPathGenerator {
         p.preallocateSpace(3 * (int)fftBounds.getWidth());
 
         auto map = [bottom, top, negativeInfinity](float v) {
-            return juce::jmap(v, negativeInfinity, 0.f, float(bottom), top);
+            return juce::jmap(v, negativeInfinity, MAX_DECIBELS, float(bottom), top);
         };
 
         auto y = map(renderData[0]);

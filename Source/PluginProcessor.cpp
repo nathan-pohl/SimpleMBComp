@@ -296,7 +296,8 @@ void SimpleMBCompAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         auto block = juce::dsp::AudioBlock<float>(buffer);
         auto ctx = juce::dsp::ProcessContextReplacing<float>(block);
         osc.process(ctx);
-        gain.setGainDecibels(JUCE_LIVE_CONSTANT(-12));
+        //gain.setGainDecibels(JUCE_LIVE_CONSTANT(-12));
+        gain.setGainDecibels(-12);
         gain.process(ctx);
     }
 

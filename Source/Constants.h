@@ -60,6 +60,8 @@ const float GAIN_MIN = -24.f;
 const float GAIN_MAX = 24.f;
 const float GAIN_INTERVAL = 0.5f;
 const float GAIN_DEFAULT = 0.f;
+const float NEGATIVE_INFINITY = -72.f;
+const float MAX_DECIBELS = 12.f;
 
 const float SLIDER_MIN_RANGE = 0.f;
 const double SLIDER_MIN_RANGE_DOUBLE = 0.0;
