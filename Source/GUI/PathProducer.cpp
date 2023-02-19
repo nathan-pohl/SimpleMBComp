@@ -21,7 +21,15 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate) 
         if (channelFifo->getAudioBuffer(tempIncomingBuffer)) {
             // first shift everything in the monoBuffer forward by however many samples are in the temp buffer
             int size = tempIncomingBuffer.getNumSamples();
-            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0), monoBuffer.getReadPointer(0, size), monoBuffer.getNumSamples() - size);
+            jassert(size <= monoBuffer.getNumSamples());
+            size = juce::jmin(size, monoBuffer.getNumSamples());
+
+            auto writePointer = monoBuffer.getWritePointer(0, 0);
+            auto readPointer = monoBuffer.getReadPointer(0, size);
+
+            std::copy(readPointer, readPointer + (monoBuffer.getNumSamples() - size), writePointer);
+
+            //juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0), monoBuffer.getReadPointer(0, size), monoBuffer.getNumSamples() - size);
             juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
 
             fftDataGenerator.produceFFtDataForRendering(monoBuffer, negativeInfinity); // Our scale only goes to -48dB, so we'll use that as our "negative infinity" for now
