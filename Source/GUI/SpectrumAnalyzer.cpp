@@ -55,7 +55,6 @@ void SpectrumAnalyzer::timerCallback() {
 }
 
 void SpectrumAnalyzer::paint(juce::Graphics& g) {
-    // doing this so we don't have to write `juce::` everywhere in this function
     using namespace juce;
     g.fillAll(Colours::black);
 
@@ -67,16 +66,16 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
         drawFFTAnalysis(g, bounds);
     }
 
-    Path border;
-    border.setUsingNonZeroWinding(false);
-    border.addRoundedRectangle(getRenderArea(bounds), ANALYSIS_AREA_PADDING);
-    border.addRectangle(getLocalBounds());
+    //Path border;
+    //border.setUsingNonZeroWinding(false);
+    //border.addRoundedRectangle(getRenderArea(bounds), ANALYSIS_AREA_PADDING);
+    //border.addRectangle(getLocalBounds());
 
-    g.setColour(Colours::black);
+    //g.setColour(Colours::black);
     //g.fillPath(border);
     drawTextLabels(g, bounds);
-    g.setColour(Colours::orange);
-    g.drawRoundedRectangle(getRenderArea(bounds).toFloat(), 4.f, 1.f);
+    //g.setColour(Colours::orange);
+    //g.drawRoundedRectangle(getRenderArea(bounds).toFloat(), 4.f, 1.f);
 }
 
 void SpectrumAnalyzer::resized() {
@@ -151,7 +150,7 @@ void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bo
         Rectangle<int> r;
         r.setSize(textWidth, fontHeight);
         r.setCentre(x, 0);
-        r.setY(1);
+        r.setY(bounds.getY());
 
         g.drawFittedText(str, r, juce::Justification::centred, NUMBER_OF_LINES_TEXT);
     }
@@ -168,7 +167,7 @@ void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bo
         int textWidth = g.getCurrentFont().getStringWidth(str);
         Rectangle<int> r;
         r.setSize(textWidth, fontHeight);
-        r.setX(getWidth() - textWidth);
+        r.setX(bounds.getRight() - textWidth);
         r.setCentre(r.getCentreX(), y);
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::lightgrey); // If gain is 0dB draw a green line, otherwise use light grey
         g.drawFittedText(str, r, juce::Justification::centred, NUMBER_OF_LINES_TEXT);
@@ -177,7 +176,7 @@ void SpectrumAnalyzer::drawTextLabels(juce::Graphics& g, juce::Rectangle<int> bo
         // the range here needs to go from 0dB to -48dB, so we can simply subtract 24dB from our existing gain array to get these numbers
         str.clear();
         str << (gDb - 24.f);
-        r.setX(1);
+        r.setX(bounds.getX() + 1);
         textWidth = g.getCurrentFont().getStringWidth(str);
         r.setSize(textWidth, fontHeight);
         g.setColour(Colours::lightgrey);
@@ -212,8 +211,6 @@ std::vector<float> SpectrumAnalyzer::getXs(const std::vector<float>& freqs, floa
 }
 
 juce::Rectangle<int> SpectrumAnalyzer::getRenderArea(juce::Rectangle<int> bounds) {
-    //juce::Rectangle<int> bounds = getLocalBounds();
-
     /*bounds.reduce(JUCE_LIVE_CONSTANT(10),
         JUCE_LIVE_CONSTANT(8));*/
         //bounds.reduce(10, 8);
@@ -240,12 +237,8 @@ void SpectrumAnalyzer::drawFFTAnalysis(juce::Graphics& g, juce::Rectangle<int> b
     Graphics::ScopedSaveState sss(g);
     g.reduceClipRegion(responseArea);
 
-    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
-        //responseArea.getY()
-    ));
-    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
-        //responseArea.getY()
-    ));
+    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0));
+    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0));
 
     // draw the left path using sky blue
     g.setColour(Colours::skyblue);
