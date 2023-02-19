@@ -24,7 +24,7 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate) 
             juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0), monoBuffer.getReadPointer(0, size), monoBuffer.getNumSamples() - size);
             juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
 
-            fftDataGenerator.produceFFtDataForRendering(monoBuffer, ABSOLUTE_MINIMUM_GAIN); // Our scale only goes to -48dB, so we'll use that as our "negative infinity" for now
+            fftDataGenerator.produceFFtDataForRendering(monoBuffer, negativeInfinity); // Our scale only goes to -48dB, so we'll use that as our "negative infinity" for now
         }
     }
 
@@ -36,7 +36,7 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate) 
     while (fftDataGenerator.getNumAvailableFFTDataBlocks() > 0) {
         std::vector<float> fftData;
         if (fftDataGenerator.getFFTData(fftData)) {
-            pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, ABSOLUTE_MINIMUM_GAIN); // Our sepctrum graph only goes to -48dB, so ue that as the "negative infinity" for now
+            pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, negativeInfinity); // Our sepctrum graph only goes to -48dB, so ue that as the "negative infinity" for now
         }
     }
 

@@ -36,13 +36,25 @@ struct FFTDataGenerator {
         // TODO combine the below into the same for loop, probably makes no difference
         //normalize the fft values
         for (int i = 0; i < numBins; ++i) {
-            fftData[i] /= (float)numBins;
+            auto v = fftData[i];
+            if (!std::isinf(v) && !std::isnan(v)) {
+                v /= (float)numBins;
+            }
+            else {
+                v = 0.f;
+            }
+            fftData[i] = v;
         }
 
+        float max = negativeInfinity;
         //convert them to decibels
         for (int i = 0; i < numBins; ++i) {
-            fftData[i] = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
+            auto data = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
+            fftData[i] = data;
+            max = juce::jmax(data, max);
         }
+
+        //jassertfalse;
 
         fftDataFifo.push(fftData);
     }

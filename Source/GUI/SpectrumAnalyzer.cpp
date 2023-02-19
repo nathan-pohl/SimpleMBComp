@@ -38,6 +38,7 @@ void SpectrumAnalyzer::parameterValueChanged(int parameterIndex, float newValue)
 void SpectrumAnalyzer::timerCallback() {
     if (shouldShowFFTAnlaysis) {
         juce::Rectangle<float> fftBounds = getAnalysisArea().toFloat();
+        fftBounds.setBottom(getLocalBounds().getBottom());
         double sampleRate = audioProcessor.getSampleRate();
 
         leftPathProducer.process(fftBounds, sampleRate);
@@ -63,8 +64,12 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
     if (shouldShowFFTAnlaysis) {
         Path leftChannelFFTPath = leftPathProducer.getPath();
         Path rightChannelFFTPath = rightPathProducer.getPath();
-        leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
-        rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+        leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
+            //responseArea.getY()
+        ));
+        rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
+            //responseArea.getY()
+        ));
 
         // draw the left path using sky blue
         g.setColour(Colours::skyblue);
@@ -88,6 +93,11 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
 
 void SpectrumAnalyzer::resized() {
     using namespace juce;
+    auto fftBounds = getAnalysisArea().toFloat();
+    auto negInf = jmap(getLocalBounds().toFloat().getBottom(), fftBounds.getBottom(), fftBounds.getY(), ABSOLUTE_MINIMUM_GAIN, GAIN_DEFAULT);
+    // DBG("Negative Infinity: " << negInf);
+    leftPathProducer.updateNegativeInfinity(negInf);
+    rightPathProducer.updateNegativeInfinity(negInf);
 }
 
 void SpectrumAnalyzer::drawBackgroundGrid(juce::Graphics& g) {
