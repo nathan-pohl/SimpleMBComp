@@ -22,6 +22,7 @@ SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBComp
     addAndMakeVisible(bandControls);
 
     setSize (600, 500);
+    startTimerHz(60);
 }
 
 SimpleMBCompAudioProcessorEditor::~SimpleMBCompAudioProcessorEditor()
@@ -46,4 +47,17 @@ void SimpleMBCompAudioProcessorEditor::resized()
     bandControls.setBounds(bounds.removeFromBottom(BAND_CONTROLS_HEIGHT));
     analyzer.setBounds(bounds.removeFromTop(ANALYZER_HEIGHT));
     globalControls.setBounds(bounds);
+}
+
+void SimpleMBCompAudioProcessorEditor::timerCallback() {
+    std::vector<float> values{
+        audioProcessor.lowBandComp.getRmsInputLevelDb(),
+        audioProcessor.lowBandComp.getRmsOutputLevelDb(),
+        audioProcessor.midBandComp.getRmsInputLevelDb(),
+        audioProcessor.midBandComp.getRmsOutputLevelDb(),
+        audioProcessor.highBandComp.getRmsInputLevelDb(),
+        audioProcessor.highBandComp.getRmsOutputLevelDb(),
+    };
+
+    analyzer.update(values);
 }

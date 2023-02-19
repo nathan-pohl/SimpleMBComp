@@ -65,12 +65,12 @@ public:
     SingleChannelSampleFifo<BlockType> leftChannelFifo{ Channel::Left };
     SingleChannelSampleFifo<BlockType> rightChannelFifo{ Channel::Right };
 
-private:
     std::array<CompressorBand, 3> compressors;
     CompressorBand& lowBandComp = compressors[0];
     CompressorBand& midBandComp = compressors[1];
     CompressorBand& highBandComp = compressors[2];
 
+private:
     using Filter = juce::dsp::LinkwitzRileyFilter<float>;
     // this is being formatted this way to show the three bands
     // all filters induce a small delay, so we need the signal to travel through the same number of filters across all three bands
