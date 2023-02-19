@@ -50,4 +50,6 @@ private:
 
     PathProducer leftPathProducer, rightPathProducer;
     bool shouldShowFFTAnlaysis = true;
+
+    void drawFFTAnalysis(juce::Graphics& g, juce::Rectangle<int> bounds);
 };

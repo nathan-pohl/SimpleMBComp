@@ -63,24 +63,8 @@ void SpectrumAnalyzer::paint(juce::Graphics& g) {
 
     drawBackgroundGrid(g, bounds);
 
-    Rectangle<int> responseArea = getAnalysisArea(bounds);
-
     if (shouldShowFFTAnlaysis) {
-        Path leftChannelFFTPath = leftPathProducer.getPath();
-        Path rightChannelFFTPath = rightPathProducer.getPath();
-        leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
-            //responseArea.getY()
-        ));
-        rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
-            //responseArea.getY()
-        ));
-
-        // draw the left path using sky blue
-        g.setColour(Colours::skyblue);
-        g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
-        // draw the right path using light yellow
-        g.setColour(Colours::lightyellow);
-        g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
+        drawFFTAnalysis(g, bounds);
     }
 
     Path border;
@@ -246,4 +230,27 @@ juce::Rectangle<int> SpectrumAnalyzer::getAnalysisArea(juce::Rectangle<int> boun
     bounds.removeFromTop(ANALYSIS_AREA_PADDING);
     bounds.removeFromBottom(ANALYSIS_AREA_PADDING);
     return bounds;
+}
+
+void SpectrumAnalyzer::drawFFTAnalysis(juce::Graphics& g, juce::Rectangle<int> bounds) {
+    using namespace juce;
+    Path leftChannelFFTPath = leftPathProducer.getPath();
+    Path rightChannelFFTPath = rightPathProducer.getPath();
+    Rectangle<int> responseArea = getAnalysisArea(bounds);
+    Graphics::ScopedSaveState sss(g);
+    g.reduceClipRegion(responseArea);
+
+    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
+        //responseArea.getY()
+    ));
+    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), 0
+        //responseArea.getY()
+    ));
+
+    // draw the left path using sky blue
+    g.setColour(Colours::skyblue);
+    g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
+    // draw the right path using light yellow
+    g.setColour(Colours::lightyellow);
+    g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
 }
