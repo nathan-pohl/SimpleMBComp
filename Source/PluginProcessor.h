@@ -14,7 +14,6 @@
 #include "DSP/CompressorBand.h"
 #include "DSP/SingleChannelSampleFifo.h"
 
-
 //==============================================================================
 class SimpleMBCompAudioProcessor  : public juce::AudioProcessor
 {

@@ -8,13 +8,22 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "DSP/Params.h"
 
 //==============================================================================
 SimpleMBCompAudioProcessorEditor::SimpleMBCompAudioProcessorEditor (SimpleMBCompAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     setLookAndFeel(&lookAndFeel);
+
+    controlBar.analyzerButton.onClick = [this]() {
+        bool shouldBeOn = controlBar.analyzerButton.getToggleState();
+        analyzer.toggleAnalysisEnablement(shouldBeOn);
+    };
+
+    controlBar.globalBypassButton.onClick = [this]() {
+        toggleGlobalBypassState();
+    };
 
     addAndMakeVisible(controlBar);
     addAndMakeVisible(analyzer);
@@ -60,4 +69,51 @@ void SimpleMBCompAudioProcessorEditor::timerCallback() {
     };
 
     analyzer.update(values);
+    updateGlobalBypassButton();
+}
+
+void SimpleMBCompAudioProcessorEditor::toggleGlobalBypassState() {
+    bool shouldEnableEverything = !controlBar.globalBypassButton.getToggleState();
+    auto params = getBypassParams();
+
+    auto bypassParamHelper = [](auto* param, bool shouldBeBypassed) {
+        param->beginChangeGesture();
+        param->setValueNotifyingHost(shouldBeBypassed ? 1.f : 0.f);
+        param->endChangeGesture();
+    };
+
+    for (auto* param : params) {
+        bypassParamHelper(param, !shouldEnableEverything);
+    }
+    bandControls.toggleAllBands(!shouldEnableEverything);
+}
+
+std::array<juce::AudioParameterBool*, 3> SimpleMBCompAudioProcessorEditor::getBypassParams() {
+    using namespace Params;
+    using namespace juce;
+    const auto& params = GetParams();
+    auto& apvts = audioProcessor.apvts;
+
+    auto boolHelper = [&apvts, &params](const auto& paramName) {
+        auto param = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(params.at(paramName)));
+        jassert(param != nullptr);
+
+        return param;
+    };
+
+    auto* lowBypassParam = boolHelper(Names::BypassedLowBand);
+    auto* midBypassParam = boolHelper(Names::BypassedMidBand);
+    auto* highBypassParam = boolHelper(Names::BypassedHighBand);
+
+    return {
+        lowBypassParam,
+        midBypassParam,
+        highBypassParam
+    };
+}
+
+void SimpleMBCompAudioProcessorEditor::updateGlobalBypassButton() {
+    auto params = getBypassParams();
+    bool allBandsAreBypassed = std::all_of(params.begin(), params.end(), [](const auto& param) {return param->get(); });
+    controlBar.globalBypassButton.setToggleState(allBandsAreBypassed, juce::NotificationType::dontSendNotification);
 }

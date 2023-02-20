@@ -23,6 +23,8 @@
               file="Source/GUI/CompressorBandControls.cpp"/>
         <FILE id="Fw6gOr" name="CompressorBandControls.h" compile="0" resource="0"
               file="Source/GUI/CompressorBandControls.h"/>
+        <FILE id="fXDcpq" name="ControlBar.cpp" compile="1" resource="0" file="Source/GUI/ControlBar.cpp"/>
+        <FILE id="cKn4E2" name="ControlBar.h" compile="0" resource="0" file="Source/GUI/ControlBar.h"/>
         <FILE id="Oet8Lq" name="CustomButtons.cpp" compile="1" resource="0"
               file="Source/GUI/CustomButtons.cpp"/>
         <FILE id="y6fDqs" name="CustomButtons.h" compile="0" resource="0" file="Source/GUI/CustomButtons.h"/>
